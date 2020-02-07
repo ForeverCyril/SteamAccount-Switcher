@@ -19,5 +19,5 @@ configure_file(${CMAKE_SOURCE_DIR}/application.rc.in
         "${MY_VERSIONINFO_RC}")
 
 
-add_executable(SteamAccountSwitcher ${src} ${ui_files} ${res_files} ${MY_VERSIONINFO_RC})
+add_executable(SteamAccountSwitcher WIN32 ${src} ${ui_files} ${res_files} ${MY_VERSIONINFO_RC})
 target_link_libraries(SteamAccountSwitcher Qt5::Core Qt5::Widgets)
