@@ -35,12 +35,12 @@
         <translation>登录</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="79"/>
+        <location filename="../src/mainwindow.cpp" line="56"/>
         <source>Steam is running</source>
         <translation>Steam已经运行</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="80"/>
+        <location filename="../src/mainwindow.cpp" line="57"/>
         <source>Kill Steam process?</source>
         <translation>结束Steam进程？</translation>
     </message>

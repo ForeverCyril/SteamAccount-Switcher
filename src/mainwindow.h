@@ -3,7 +3,7 @@
 
 #include <QMainWindow>
 #include <QSettings>
-#include "account.h"
+#include "steam_account.h"
 
 namespace Ui {
 class MainWindow;
@@ -17,8 +17,11 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+public slots:
+    void login();
+    void onAccountChanged(int new_index);
+
 private:
-    void initUI();
     bool killSteamProcess();
 
     Ui::MainWindow *ui;
@@ -26,7 +29,7 @@ private:
     QSettings *reg;
     QString steam_path;
     QString steam_exec;
-    QList<Account> users;
+    QList<SteamAccount> users;
 };
 
 #endif // MAINWINDOW_H
