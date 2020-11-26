@@ -1,5 +1,5 @@
 <RCC>
     <qresource prefix="/">
-        <file alias="app_icon">icon/steam-papirus.svg</file>
+        <file alias="icon/steam-papirus.svg">icon/steam-papirus.svg</file>
     </qresource>
 </RCC>

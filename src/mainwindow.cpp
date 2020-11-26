@@ -1,64 +1,62 @@
 #include "mainwindow.h"
+
+#include <QDesktopServices>
+#include <QMessageBox>
+#include <QProcess>
+#include <QSettings>
+#include <QUrl>
+
+#include "config.h"
 #include "ui_mainwindow.h"
 
-#include <QSettings>
-#include <QDesktopServices>
-#include <QUrl>
-#include <QProcess>
-#include <QMessageBox>
-
-MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent),
-    ui(new Ui::MainWindow)
-{
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);
-
-    connect(ui->users, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &MainWindow::onAccountChanged);
-    connect(ui->loginBtn, &QPushButton::clicked, this, &MainWindow::login);
-
+    QApplication::setApplicationDisplayName(tr(APP_NAME));
+    setWindowTitle(tr("Login"));
+    setWindowIcon(QIcon(":/icon/steam-papirus.svg"));
     QSettings setting("config.ini", QSettings::IniFormat);
-    ui->autoexit->setChecked(setting.value("auto_exit").toBool());
+    ui->auto_quit->setChecked(setting.value("auto_exit").toBool());
 
     reg = new QSettings(STEAM_REG, QSettings::NativeFormat);
-    //Find Steam Path form reg
+    // Find Steam Path form reg
     steam_path = reg->value("SteamPath").toString();
     steam_exec = reg->value("SteamExe").toString();
 
-    //load Saved User in loginusers.vdf
-    users = SteamAccount::loadUsersFromFile(steam_path+R"(\config\loginusers.vdf)");
+    // load Saved User in loginusers.vdf
+    users = SteamAccount::loadUsersFromFile(steam_path + R"(\config\loginusers.vdf)");
 
-    for(auto user : users){
-        ui->users->addItem(user.getAccountName());
-    }
-
-    // show recent login account
     QString recentUser = reg->value("AutoLoginUser").toString();
-    for(int i=0;i<users.size();i++){
-        if(users.at(i).getAccountName() == recentUser){
-            ui->users->setCurrentIndex(i);
-            break;
+    size_t selection = 0;
+    for (size_t i = 0; i < users.size(); ++i) {
+        QString name = users.at(i).getAccountName();
+        if (name == recentUser) {
+            selection = i;
         }
+        ui->list_account->addItem(name);
     }
+    connect(ui->list_account->selectionModel(), &QItemSelectionModel::currentChanged, this, &MainWindow::onAccountChanged);
 
+    ui->list_account->setCurrentRow(selection);
+
+    connect(ui->btn_login, &QPushButton::released, this, &MainWindow::login);
 }
 
-MainWindow::~MainWindow()
-{
+MainWindow::~MainWindow() {
     QSettings setting("config.ini", QSettings::IniFormat);
-    setting.setValue("auto_exit", ui->autoexit->isChecked());
+    setting.setValue("auto_exit", ui->auto_quit->isChecked());
     delete ui;
 }
 
 bool MainWindow::killSteamProcess() {
     QProcess p;
-    int choice = QMessageBox::information(
-            this,
-            tr("Steam is running"),
-            tr("Kill Steam process?"),
-            QMessageBox::Ok|QMessageBox::Cancel, QMessageBox::Cancel);
+    int choice = QMessageBox::information(this, tr("Steam is running"), tr("Kill Steam process?"), QMessageBox::Ok | QMessageBox::Cancel,
+                                          QMessageBox::Cancel);
 
-    if(choice == QMessageBox::Ok){
-        p.execute("taskkill",QStringList()<<"/IM"<<"steam.exe"<<"/T"<<"/F");
+    if (choice == QMessageBox::Ok) {
+        p.execute("taskkill", QStringList() << "/IM"
+                                            << "steam.exe"
+                                            << "/T"
+                                            << "/F");
         p.waitForFinished();
     }
     p.close();
@@ -66,24 +64,28 @@ bool MainWindow::killSteamProcess() {
 }
 
 void MainWindow::login() {
-    QString id = ui->users->currentText();
-    reg->setValue("AutoLoginUser", id);
+    reg->setValue("AutoLoginUser", ui->account->text());
 
-    //detect whether steam is running
-    //tasklist /FI "imagename eq Steam.exe"
+    // detect whether steam is running
+    // tasklist /FI "imagename eq Steam.exe"
     QProcess p;
-    p.start("tasklist",QStringList()<<"/FI"<<"imagename eq Steam.exe");
+    p.start("tasklist", QStringList() << "/FI"
+                                      << "imagename eq Steam.exe");
     p.waitForFinished();
     QString res = QString::fromLocal8Bit(p.readAll());
-    qDebug()<<res;
+    qDebug() << res;
     p.close();
-    if(!( res.contains("steam.exe") && !killSteamProcess())){
+    if (!(res.contains("steam.exe") && !killSteamProcess())) {
         QDesktopServices::openUrl(QUrl::fromLocalFile(steam_exec));
-        if(ui->autoexit->isChecked()) this->close();
+        if (ui->auto_quit->isChecked()) {
+            qApp->exit(0);
+        }
     }
 }
 
-void MainWindow::onAccountChanged(int new_index) {
-    this->ui->name->setText(this->users.at(new_index).getPersonalName());
-    this->ui->time->setText(this->users.at(new_index).getLastLogin().toString());
+void MainWindow::onAccountChanged(const QModelIndex &current) {
+    auto user = users.at(current.row());
+    ui->account->setText(user.getAccountName());
+    ui->username->setText(user.getPersonalName());
+    ui->last_login->setText(user.getLastLogin().toString());
 }

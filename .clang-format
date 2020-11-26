@@ -1,0 +1,7 @@
+BasedOnStyle: Google
+Standard: c++17
+ColumnLimit: 140
+IndentWidth: 4
+AccessModifierOffset: -4
+MaxEmptyLinesToKeep: 2
+StatementMacros: [ Q_UNUSED LOG DEBUG ]

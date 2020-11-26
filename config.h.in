@@ -1,0 +1,5 @@
+#include <string_view>
+
+constexpr const char *PROJECT_NAME = "@PROJECT_NAME@";
+constexpr const char *APP_NAME = "@APP_NAME@";
+constexpr const char *VERSION = "@APP_VERSION@";

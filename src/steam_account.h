@@ -1,25 +1,24 @@
 #ifndef STEAMACCOUNTSWITCHER_STEAM_ACCOUNT_H
 #define STEAMACCOUNTSWITCHER_STEAM_ACCOUNT_H
 
-#include <QString>
-#include <QFile>
-#include <QDebug>
 #include <QDateTime>
+#include <QDebug>
+#include <QFile>
+#include <QString>
 #include <utility>
 
 class SteamAccount {
-
 private:
     QString account_name;
     QString personal_name;
     QDateTime last_login;
 
 public:
-    SteamAccount()= default;
+    SteamAccount() = default;
     SteamAccount(const SteamAccount &account);
     explicit SteamAccount(QString &account, QString &name = QString());
 
-    static QList<SteamAccount> loadUsersFromFile(const QString& filename);
+    static QList<SteamAccount> loadUsersFromFile(const QString &filename);
 
     [[nodiscard]] const QString &getAccountName() const;
 
@@ -35,4 +34,4 @@ public:
 };
 
 
-#endif //STEAMACCOUNTSWITCHER_STEAM_ACCOUNT_H
+#endif  // STEAMACCOUNTSWITCHER_STEAM_ACCOUNT_H
