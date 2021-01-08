@@ -16,7 +16,7 @@ private:
 public:
     SteamAccount() = default;
     SteamAccount(const SteamAccount &account);
-    explicit SteamAccount(QString &account, QString &name = QString());
+    explicit SteamAccount(QString &account, QString &name);
 
     static QList<SteamAccount> loadUsersFromFile(const QString &filename);
 

@@ -17,10 +17,10 @@ class MainWindow : public QMainWindow {
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
+    ~MainWindow() override;
 
 public slots:
-    void login();
+    void login(const QString &user_name = "");
     void onAccountChanged(const QModelIndex &current);
 
 private:

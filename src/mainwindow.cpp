@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 
 #include <QDesktopServices>
+#include <QInputDialog>
 #include <QMessageBox>
 #include <QProcess>
 #include <QSettings>
@@ -37,8 +38,23 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(ui->list_account->selectionModel(), &QItemSelectionModel::currentChanged, this, &MainWindow::onAccountChanged);
 
     ui->list_account->setCurrentRow(selection);
+    connect(ui->btn_login, &QPushButton::released, this, [this] { login(ui->account->text()); });
+    connect(ui->btn_add_user, &QToolButton::clicked, this, [this] {
+        bool isConfirm = false;
+        QString user_name;
+        do {
+            user_name =
+                QInputDialog::getText(this, tr("Add User"), tr("Enter Steam Account Name.")
+                    , QLineEdit::Normal, "", &isConfirm, Qt::Popup, Qt::ImhLatinOnly);
+        } while (isConfirm && user_name.isEmpty()
+                 && QMessageBox::critical(this, tr("Error Input"), tr("Username can not be empty")));
 
-    connect(ui->btn_login, &QPushButton::released, this, &MainWindow::login);
+        if (isConfirm && !user_name.isEmpty()) {
+            qDebug() << "Add New User: " << user_name;
+            login(user_name);
+
+        }
+    });
 }
 
 MainWindow::~MainWindow() {
@@ -48,23 +64,21 @@ MainWindow::~MainWindow() {
 }
 
 bool MainWindow::killSteamProcess() {
-    QProcess p;
     int choice = QMessageBox::information(this, tr("Steam is running"), tr("Kill Steam process?"), QMessageBox::Ok | QMessageBox::Cancel,
                                           QMessageBox::Cancel);
-
     if (choice == QMessageBox::Ok) {
-        p.execute("taskkill", QStringList() << "/IM"
+        QProcess::execute("taskkill", QStringList() << "/IM"
                                             << "steam.exe"
                                             << "/T"
                                             << "/F");
-        p.waitForFinished();
     }
-    p.close();
     return choice == QMessageBox::Ok;
 }
 
-void MainWindow::login() {
-    reg->setValue("AutoLoginUser", ui->account->text());
+void MainWindow::login(const QString &user_name) {
+    if (!user_name.isEmpty()) {
+        reg->setValue("AutoLoginUser", user_name);
+    }
 
     // detect whether steam is running
     // tasklist /FI "imagename eq Steam.exe"
@@ -75,6 +89,7 @@ void MainWindow::login() {
     QString res = QString::fromLocal8Bit(p.readAll());
     qDebug() << res;
     p.close();
+
     if (!(res.contains("steam.exe") && !killSteamProcess())) {
         QDesktopServices::openUrl(QUrl::fromLocalFile(steam_exec));
         if (ui->auto_quit->isChecked()) {

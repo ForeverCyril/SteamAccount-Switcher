@@ -6,13 +6,13 @@
 #include "mainwindow.h"
 
 int main(int argc, char *argv[]) {
+    QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QApplication app(argc, argv);
     QApplication::setApplicationName(APP_NAME);
     QApplication::setApplicationVersion(VERSION);
-
     QTranslator translator;
 
-    for (auto lang : QLocale().uiLanguages()) {
+    for (const auto& lang : QLocale().uiLanguages()) {
         QString qm_filename = QString(":/lang/%1_%2.qm").arg(PROJECT_NAME).arg(lang);
         QFile qm_file(qm_filename);
         if (qm_file.exists()) {
@@ -22,7 +22,6 @@ int main(int argc, char *argv[]) {
             break;
         }
     }
-
 
     MainWindow w;
     w.show();
